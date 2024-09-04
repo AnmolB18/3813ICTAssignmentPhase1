@@ -18,6 +18,8 @@ h1, h2, h3 {
   align-items: center;
   height: 100vh;
   background-color: #ffffff; /* White background for login */
+  background-image: url(loginbackground.jpg);
+  background-size: cover;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
 }
@@ -25,10 +27,16 @@ h1, h2, h3 {
 .login-form {
   background-color: #f9f9f9; /* Slightly darker beige for form */
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0.95; /* Increased opacity for better readability */
+  border-radius: 10px; /* Increased border radius for a smoother look */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Increased box shadow for more depth */
   max-width: 400px;
-  width: 100%;
+  width: calc(100% - 2rem); /* Adjusted width to account for padding */
+  margin: 0 auto; /* Added margin to center the form horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 input[type="text"], input[type="password"] {
