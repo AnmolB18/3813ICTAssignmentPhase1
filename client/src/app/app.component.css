@@ -94,7 +94,7 @@ button:hover {
 }
 
 .app-header {
-  background-color: green; /* green color */
+  background-color: #3D9970; /* olive green color */
   color: #fff;
   padding: 1rem;
   text-align: center;
@@ -130,7 +130,7 @@ button:hover {
 }
 
 .navbar a:hover {
-  text-decoration: underline;
+  text-decoration: overline;
 }
 
 .main-content {
@@ -159,7 +159,7 @@ button:hover {
 }
 
 .app-footer {
-  background-color: green; /* Matching green color */
+  background-color: #3D9970; /* Matching olive green color */
   color: #fff;
   text-align: center;
   padding: 1rem;
