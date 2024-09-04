@@ -100,6 +100,16 @@ button:hover {
   text-align: center;
 }
 
+.app-header h1 {
+  color: #fff; /* Set the title color to white */
+}
+
+.app-header > * {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+} 
+
 .navbar ul {
   list-style: none;
   padding: 0;
@@ -116,6 +126,7 @@ button:hover {
   color: #fff;
   text-decoration: none;
   font-weight: bold;
+  justify-content: center;
 }
 
 .navbar a:hover {
