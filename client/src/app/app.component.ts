@@ -421,5 +421,4 @@ export class AppComponent {
       this.channelMessages = JSON.parse(savedMessages);
     }
   }
-  
 }
