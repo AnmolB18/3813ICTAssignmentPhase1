@@ -2,8 +2,10 @@
 <div class="app-container">
   <!-- Header Section -->
   <header class="app-header" *ngIf="isAuthenticated">
+    <!-- Display the application title -->
     <h1>{{ title }}</h1>
     <br>
+    <!-- Navigation bar -->
     <nav class="navbar">
       <ul>
         <li><a href="#" (click)="navigateTo('home')">Home Page</a></li>
@@ -22,18 +24,25 @@
 <section *ngIf="!isAuthenticated" class="login-section">
   <div class="login-container">
     <div class="login-form">
+      <!-- Login form title -->
       <h2>Login</h2>
+      <!-- Login form -->
       <form (submit)="login()">
         <div>
+          <!-- Username input field -->
           <label for="username">Username:</label>
           <input type="text" id="username" [(ngModel)]="username" name="username" required>
         </div>
         <div>
+          <!-- Password input field -->
           <label for="password">Password:</label>
           <input type="password" id="password" [(ngModel)]="password" name="password" required>
         </div>
+        <!-- Login button -->
         <button type="submit">Login</button>
+        <!-- Display login error message -->
         <p *ngIf="loginError" class="error">{{ loginError }}</p>
+        <!-- Register link -->
         <p>Don't have an account? <button (click)="register()">Register</button></p>
       </form>
     </div>
@@ -43,6 +52,7 @@
     <!-- Home Section -->
     <section *ngIf="isAuthenticated && currentSection === 'home'" class="home-section">
       <h1>Home Page</h1>
+      <!-- Home page content -->
       <p>Navigate using the menu above to explore the application's features.</p>
       
       <!-- Chat User Specific Content -->
@@ -51,8 +61,11 @@
         <ul>
           <li *ngFor="let group of groups">
             {{ group.name }}
+            <!-- Join group button -->
             <button (click)="joinGroupRequest(group.name)" *ngIf="!chatUser?.groups?.includes(group.name)">Request to Join</button>
+             <!-- Leave group button -->
             <button (click)="leaveGroup(group.name)" *ngIf="chatUser?.groups?.includes(group.name)">Leave Group</button>
+             <!-- Group channels list -->
             <ul *ngFor="let channel of group.channels">
               <li>
                 {{ channel.name }}
@@ -62,7 +75,9 @@
             </ul>
           </li>
         </ul>
+        <!-- User groups title -->
         <h3>Your Groups</h3>
+         <!-- User groups list -->
         <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
           <li *ngFor="let group of chatUser.groups">{{ group }}</li>
         </ul>
@@ -75,10 +90,13 @@
       <!-- Admin view to manage group requests -->
       <div *ngIf="userRole === 'superAdmin' || userRole === 'groupAdmin'">
         <h2>Manage Group Requests</h2>
+        <!-- Group requests list -->
         <ul *ngFor="let group of groups">
           <li *ngFor="let request of group.requests">
             {{ request }} requested to join {{ group.name }}
+            <!-- Approve request button -->
             <button (click)="approveRequest(group.name, request)">Approve</button>
+            <!-- Deny request button -->
             <button (click)="denyRequest(group.name, request)">Deny</button>
           </li>
         </ul>
@@ -86,6 +104,7 @@
     </section>
     
     <!-- Chat Section -->
+     <!-- This section is only visible if the user is authenticated and the current section is 'chat' -->
 <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
   <h1>Chat Function</h1>
   <div *ngIf="userRole === 'chatUser'">
@@ -95,6 +114,7 @@
         <div *ngFor="let channel of getChannels(group)">
           <div class="channel-chat">
             <h4>{{ channel.name }}</h4>
+             <!-- This div is only visible if there are messages for the channel -->
             <div class="messages" *ngIf="channelMessages[channel.name]">
               <div *ngFor="let message of channelMessages[channel.name]">
                 <p>{{ message.username }}: {{ message.text }}</p>
@@ -106,6 +126,7 @@
         </div>
       </li>
     </ul>
+        <!-- Button to delete the account -->
     <button (click)="deleteAccount()">Delete Account</button>
   </div>
 </section>
@@ -121,6 +142,7 @@
         <!-- Display Created Groups -->
         <div *ngIf="groups.length > 0" class="groups-list">
           <h3>Groups:</h3>
+          <!-- Loop through each group -->
           <ul>
             <li *ngFor="let group of groups">
               {{ group.name }}
