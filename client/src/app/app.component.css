@@ -18,11 +18,12 @@ h1, h2, h3 {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  /* Set the background color to white */
   background-color: #ffffff; /* White background for login */
-  background-image: url(loginbackground.jpg);
-  background-size: cover;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  /* Add a background image */
+  background-image: url(loginbackground.jpg); /* Set the background size to cover the entire container */
+  background-size: cover; /* Add a box shadow for depth */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  border-radius: 8px;
 }
 
 .login-form {
@@ -116,10 +117,10 @@ button:hover {
 }
 
 .app-header {
-  background-color: #3D9970; /* olive green color */
-  color: #fff;
+  background-color: #3D9970;  /* Set the background color to olive green */
+  color: #fff;  /* Set the text color to white */
   padding: 1rem;
-  text-align: center;
+  text-align: center;   /* Center the text horizontally */
 }
 
 .app-header h1 {
@@ -128,16 +129,16 @@ button:hover {
 
 .app-header > * {
   display: block;
-  margin: 0 auto;
+  margin: 0 auto;   /* Center the element horizontally */
   text-align: center;
 } 
 
 .navbar ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style: none;   /* Remove the list style */
+  padding: 0;  /* Remove padding and margin */
+  margin: 0; 
   display: flex;
-  justify-content: center;
+  justify-content: center;   /* Center the navigation items horizontally */
 }
 
 .navbar li {
@@ -146,13 +147,13 @@ button:hover {
 
 .navbar a {
   color: #fff;
-  text-decoration: none;
-  font-weight: bold;
+  text-decoration: none;   /* Remove the text decoration */
+  font-weight: bold;   /* Set the font weight to bold */
   justify-content: center;
 }
 
 .navbar a:hover {
-  text-decoration: overline;
+  text-decoration: overline; /* Add an overline text decoration on hover */
 }
 
 .main-content {
@@ -172,16 +173,16 @@ button:hover {
 .group-item, .channel-item {
   padding: 0.75rem;
   background-color: #ffffff;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
+  border-radius: 4px;   /* Set the border radius for a smoother look */
+  margin-bottom: 0.5rem;   /* Add a margin bottom for spacing */
 }
 
 .group-header, .channel-header {
-  font-weight: bold;
+  font-weight: bold;   /* Set the font weight to bold */
 }
 
 .app-footer {
-  background-color: #3D9970; /* Matching olive green color */
+  background-color: #3D9970;   /* Set the background color to olive green */
   color: #fff;
   text-align: center;
   padding: 1rem;
