@@ -50,11 +50,33 @@ input[type="text"], input[type="password"] {
 
 /* General Button Style */
 button {
+  /* Remove default button styles */
   border: none;
+  outline: none;
+  background-color: #4CAF50; /* Add a default background color */
+  color: #fff; /* Add a default text color */
   padding: 0.5rem 1rem; /* Slightly smaller padding */
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem; /* Slightly smaller font size */
+  font-weight: 500; /* Add a medium font weight */
+  transition: background-color 0.2s ease-in-out; /* Add a transition effect */
+}
+
+/* Hover and Active States */
+button:hover {
+  background-color: #3e8e41; /* Darken the background color on hover */
+}
+
+button:active {
+  background-color: #2f6f31; /* Darken the background color on active */
+}
+
+/* Disabled State */
+button:disabled {
+  background-color: #ccc; /* Change the background color to gray */
+  color: #666; /* Change the text color to dark gray */
+  cursor: not-allowed; /* Change the cursor to not-allowed */
 }
 
 /* Request to Join Button */
