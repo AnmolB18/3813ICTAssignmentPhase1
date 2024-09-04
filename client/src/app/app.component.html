@@ -165,6 +165,7 @@
                   <li *ngFor="let member of channel.members">
                     {{ member }}
                     <button (click)="removeMember(group.name, member)">Remove</button>
+                    <button (click)="banMember(group.name, channel.name, member)">Ban and Report</button>
                   </li>
                 </ul>
                 <button (click)="removeChannel(group.name, channel.name)">Remove Channel</button>

@@ -421,4 +421,10 @@ export class AppComponent {
       this.channelMessages = JSON.parse(savedMessages);
     }
   }
+
+  banMember(groupName: string, channelName: string, member: string): void {
+    console.log(`Reporting to super admins: Banned member ${member} from channel ${channelName} in group ${groupName}`)
+  }
+
 }
+
