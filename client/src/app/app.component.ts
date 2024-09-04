@@ -343,7 +343,6 @@ export class AppComponent {
       }
     }
   }
-  
   demoteUser() {
     const usernameToDemote = prompt('Enter the username to demote:');
     if (usernameToDemote) {
