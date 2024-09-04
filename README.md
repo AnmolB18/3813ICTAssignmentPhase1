@@ -3,7 +3,7 @@
 
 This project is a fully functional text and video chat system that facilitates real-time communication among users within various groups and channels. It's built using the MEAN stack (MongoDB, Express, Angular, Node.js), with real-time messaging powered by Socket.io and video streaming enabled through Peer.js.
 
-#Core Features
+# Core Features
 The system supports three different user roles:
 - Super Admin
 - Group Admin
