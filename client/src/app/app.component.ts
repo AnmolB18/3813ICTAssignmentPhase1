@@ -82,6 +82,7 @@ export class AppComponent {
     }
     return { username, publicUsername, groups: [] };
   }
+
   getGroup(groupName: string) {
     return this.groups.find(g => g.name === groupName);
   }
@@ -311,14 +312,20 @@ export class AppComponent {
 
   users: { username: string, password: string, role: 'chatUser' | 'groupAdmin' | 'superAdmin' }[] = [];
 
-  createUser() {
-    const newUsername = prompt('Enter a new username:');
-    const newPassword = prompt('Enter a password for the new user:');
-    if (newUsername && newPassword) {
-      this.users.push({ username: newUsername, password: newPassword, role: 'chatUser' });
-      console.log('User created:', newUsername);
-    }
+createUser() {
+  const newUsername = prompt('Enter a new username:');
+  const newPassword = prompt('Enter a password for the new user:');
+  
+  // Check if the username already exists
+  const existingUser = this.users.find(user => user.username === newUsername);
+  
+  if (!existingUser && newUsername && newPassword) {
+    this.users.push({ username: newUsername, password: newPassword, role: 'chatUser' });
+    console.log('User created:', newUsername);
+  } else {
+    console.log('Username already exists. Please choose a different username.');
   }
+}
 
   deleteUser() {
     const usernameToDelete = prompt('Enter the username to delete:');
