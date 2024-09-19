@@ -369,10 +369,15 @@ createUser() {
   register() {
     const newUsername = prompt('Enter a new username:');
     const newPassword = prompt('Enter a password for the new user:');
-    if (newUsername && newPassword) {
+    const newEmail = prompt('Enter an email for the new user:'); // Add email input
+    const newId = Math.floor(Math.random() * 100000); // Generate a random id
+  
+    if (newUsername && newPassword && newEmail) {
       const newUser = {
+        id: newId, // Add id property
         username: newUsername,
         publicUsername: newUsername, // Add publicUsername property
+        email: newEmail, // Add email property
         groups: [], // Add groups property
         password: newPassword,
         role: 'chatUser' as 'chatUser'
