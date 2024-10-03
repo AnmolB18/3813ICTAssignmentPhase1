@@ -107,26 +107,27 @@
      <!-- This section is only visible if the user is authenticated and the current section is 'chat' -->
 <section *ngIf="isAuthenticated && currentSection === 'chat'" class="chat-section">
   <h1>Chat Function</h1>
-  <div *ngIf="userRole === 'chatUser'">
+  <div *ngIf="userRole === 'superAdmin'">
     <h3>Your Channels</h3>
-    <ul *ngIf="chatUser && chatUser.groups && chatUser.groups.length > 0">
-      <li *ngFor="let group of chatUser.groups">
-        <div *ngFor="let channel of getChannels(group)">
-          <div class="channel-chat">
-            <h4>{{ channel.name }}</h4>
-             <!-- This div is only visible if there are messages for the channel -->
-            <div class="messages" *ngIf="channelMessages[channel.name]">
-              <div *ngFor="let message of channelMessages[channel.name]">
-                <p>{{ message.username }}: {{ message.text }}</p>
-              </div>
-            </div>
-            <input type="text" [(ngModel)]="newMessage[channel.name]" placeholder="Type your message..." />
-            <button (click)="sendMessage(group, channel.name)">Send</button>
-          </div>
-        </div>
-      </li>
-    </ul>
-        <!-- Button to delete the account -->
+    <div class="chat-container">
+      <form (submit)="sendMessage($event)">
+        <input
+          type="text"
+          [(ngModel)]="message"
+          name="message"
+          placeholder="Type your message..."
+          required
+        />
+        <button type="submit">Send</button>
+      </form>
+    
+      <ul class="chat-messages">
+        <li *ngFor="let msg of messages">
+          <strong>{{ msg.username }}:</strong> {{ msg.message }}
+        </li>
+      </ul>
+    </div>
+          <!-- Button to delete the account -->
     <button (click)="deleteAccount()">Delete Account</button>
   </div>
 </section>

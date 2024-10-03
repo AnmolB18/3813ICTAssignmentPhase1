@@ -9,4 +9,5 @@ export const routes: Routes = [
   { path: 'video-chat', component: VideoChatComponent },
   { path: 'group-management', component: GroupManagementComponent },
   { path: 'user-management', component: UserManagementComponent },
+  { path: '', component: ChatComponent },  // Set the default route to the chat component
 ];

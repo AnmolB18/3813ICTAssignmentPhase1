@@ -23,6 +23,8 @@
     "@angular/ssr": "^18.1.4",
     "bootstrap": "^5.3.3",
     "express": "^4.18.2",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.6.3",
     "peerjs": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
