@@ -42,7 +42,7 @@ export class AppComponent {
   messages: { username: string; message: string }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
-  private apiUrl = 'http://localhost:5000/api/messages';
+  private apiUrl = 'http://localhost:000/api/messages';
   
   constructor(private socketService: SocketService, private http: HttpClient) {
     this.username = this.getUsername(); // Automatically get the username
