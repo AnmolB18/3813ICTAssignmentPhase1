@@ -1,4 +1,4 @@
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule to use ngModel
 import { VideoChatComponent } from './video-chat/video-chat.component';
@@ -43,7 +43,7 @@ interface Group {
   providedIn: 'root'
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Chat Application';
   companyName: string = 'Your Company Name';
   currentSection: string = 'home';
@@ -60,7 +60,6 @@ export class AppComponent {
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
-  channelCounts: { [key: string]: number } = {}; // Map to track channel counts for each group
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -230,30 +229,23 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
 
 
 createChannel(groupId: string) {
-  // Find the group in local state
-  const group = this.groups.find(g => g._id === groupId);
+  // Find the group in the local state
+  const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
 
   if (group) {
-      // Initialize count for the group if it doesn't exist
-      if (!this.channelCounts[groupId]) {
-          this.channelCounts[groupId] = 0;
-      }
-      
-      // Increment the channel count for this group
-      this.channelCounts[groupId]++;
+      // Determine the new channel number by checking the number of channels in the group
+      const newChannelNumber = group.channels.length + 1;
+      const newChannelName = `Channel ${newChannelNumber}`; // Sequential naming
 
-      // Create the new channel name
-      const channelName = `Channel ${this.channelCounts[groupId]}`; // "New Channel 1", "New Channel 2", etc.
-
-      // Create the channel object
-      const newChannel = { name: channelName, members: [] };
+      // Create the new channel object
+      const newChannel = { name: newChannelName, members: [] };
 
       // Update local state by adding the new channel
       group.channels.push(newChannel);
-      console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+      console.log(`Channel created locally: ${newChannelName} in Group ${group.name}`);
 
       // Call the backend to save the new channel
-      this.http.post('http://localhost:5000/api/create-channel', { name: channelName, groupId })
+      this.http.post('http://localhost:5000/api/create-channel', { name: newChannelName, groupId })
           .subscribe(
               (response: any) => {
                   console.log('Channel created successfully:', response);
@@ -266,9 +258,6 @@ createChannel(groupId: string) {
       console.error(`Group with ID ${groupId} not found.`);
   }
 }
-
-
-
 
   removeGroup(groupName: string) {
     this.groups = this.groups.filter(g => g.name !== groupName);
@@ -568,9 +557,22 @@ createUser() {
     console.log(`Reporting to super admins: Banned member ${member} from channel ${channelName} in group ${groupName}`)
   }
 
+  loadGroups() {
+    this.http.get<any[]>('http://localhost:5000/api/groups') // Adjust your API endpoint accordingly
+      .subscribe(
+        (data) => {
+          this.groups = data; // Store fetched data in the groups array
+        },
+        (error) => {
+          console.error('Error fetching groups:', error);
+        }
+      );
+  }
+
   ngOnInit(): void {
     
     this.getUserData(); // Call the method here to fetch user data on initialization
+    this.loadGroups(); // Load groups when the component initializes
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
