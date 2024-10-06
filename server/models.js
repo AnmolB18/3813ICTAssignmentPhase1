@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  id: { type: mongoose.Types.ObjectId, unique: true, not: null, }, // Ensure this field is unique
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true }, // Ensure email is unique as well
   password: { type: String, required: true },
-  groups: { type: [String], default: [] },
-  role: { type: String, default: 'chatUser' }
+  role: { type: String, required: true },
+  groups: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Group' }],  // Groups the user belongs to
+  channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }]  // Channels the user belongs to
 });
 
 
@@ -15,13 +15,17 @@ const groupSchema = new mongoose.Schema({
   name: { type: String, required: true },
   admins: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   channels: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Channel' }],
+  memberIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  requests: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
 
 // Channel Schema
 const channelSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+  name: String,
+  groupId: { type: mongoose.Schema.Types.ObjectId, ref: 'Group' },
+  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
 });
+
 
 // Message Schema
 const messageSchema = new mongoose.Schema({

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // Import FormsModule to use ngModel
 import { VideoChatComponent } from './video-chat/video-chat.component';
 import { UserManagementComponent } from './user-management/user-management.component';
@@ -10,6 +10,20 @@ import { HttpClientModule } from '@angular/common/http';
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+interface User {
+  _id: string;       // The user's unique ID from MongoDB
+  username: string;  // The user's username
+  role: string;      // The user's role ('superAdmin', 'groupAdmin', 'chatUser')
+  groups: any[];     // An array of groups the user is part of
+  channels: any[];   // An array of channels the user is part of
+}
+interface Group {
+  _id?: string; // Optional if it's not available until created
+  name: string;
+  channels: { name: string; members: string[] }[];
+  members: string[];
+  requests: string[];
+}
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -37,21 +51,64 @@ export class AppComponent {
   username: string = '';
   password: string = '';
   loginError: string | null = null;
-  userRole: 'chatUser' | 'groupAdmin' | 'superAdmin' | '' = ''; // Manage user roles with string literals
+  userRole: string = '';  // Manage user roles with string literals
   message: string = '';
   messages: { username: string; message: string; }[] = [];
   channelMessages: { [channelName: string]: { username: string, text: string }[] } = {};
   newMessage: { [channelName: string]: string } = {};
-  private apiUrl = 'http://localhost:3000/api/messages';
+  private apiUrl = 'http://localhost:5000/api/messages';
+  userGroups: any[] = []; // Store user's groups
+  userChannels: any[] = []; // Store user's channels
+  groups: Group[] = [];
+ 
   
-  constructor(private socketService: SocketService, private http: HttpClient) {
+  constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
     this.username = this.getUsername(); // Automatically get the username
   }
 
    // Updated to store groups and their associated channels
-  groups: { name: string, channels: { name: string, members: string[] }[], members: string[], requests: string[] }[] = [];
   chatUser: { username: string, publicUsername: string, groups: string[] } | null = null; // Stores the chat user's info
 
+
+  
+// Method to fetch user details
+fetchUserDetails(userId: string) {
+  this.http.get<User>(`http://localhost:5000/users/${userId}`)
+    .subscribe(
+      user => {
+        this.userRole = user.role;
+        this.userGroups = user.groups;
+        this.userChannels = user.channels;
+        console.log('User Role:', this.userRole);
+        console.log('User Groups:', this.userGroups);
+        console.log('User Channels:', this.userChannels);
+      },
+      error => {
+        console.error('Error fetching user details:', error);
+      }
+    );
+}
+getUserData() {
+  if (isPlatformBrowser(this.platformId)) {
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+  console.log('Fetching user data for userId:', userId); // Debugging log
+  if (userId) {
+    this.http.get<User>(`http://localhost:5000/users/${userId}`)
+      .subscribe(
+        (user) => {
+          console.log('User data retrieved:', user); // For debugging
+          this.userRole = user.role; // Set the user role from the response
+        },
+        (error) => {
+          console.error('Error retrieving user data:', error);
+        }
+      );
+  } else {
+    console.warn('User ID is not found in local storage.');
+  }
+}
+}
   initializeGroups() {
     // Sample groups initialized for demonstration
     this.groups = [
@@ -63,25 +120,44 @@ export class AppComponent {
   }
 
   login() {
-    const user = this.users.find(u => u.username === this.username && u.password === this.password);
-    if (user) {
-      this.isAuthenticated = true;
-      this.userRole = user.role;
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'super' && this.password === '123') {
-      this.isAuthenticated = true;
-      this.userRole = 'superAdmin'; // Set role for Super Admin
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else if (this.username === 'group' && this.password === '123') {
-      this.isAuthenticated = true;
-      this.userRole = 'groupAdmin'; // Set role for Group Admin
-      this.loginError = null;
-      this.navigateTo('home'); // Redirect to home after successful login
-    } else {
-      this.loginError = 'Invalid username or password. Please try again.';
-    }
+    const loginData = {
+      username: this.username,
+      password: this.password
+    };
+  
+    this.http.post('http://localhost:5000/api/login', loginData)
+      .subscribe(
+        (response: any) => {
+          console.log('Login Response:', response);
+  
+          // If login is successful
+          this.isAuthenticated = true;
+  
+          // Store userId in localStorage using the response object
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('userId', response.user._id); // Use response.user._id instead of user._id
+            localStorage.setItem('userRole', response.user.role); // Store userRole in localStorage
+          }
+          
+          // Fetch user role from response and ensure it's one of the expected values
+          const roleFromBackend = response.user.role;
+          if (roleFromBackend === 'chatUser' || roleFromBackend === 'groupAdmin' || roleFromBackend === 'superAdmin') {
+            this.userRole = roleFromBackend; // Set role if it's valid
+          } else {
+            this.userRole = 'chatUser'; // Handle unexpected roles
+          }
+  
+          this.fetchUserDetails(response.user._id); // Use the logged-in user's ID to fetch details
+          this.loginError = null;
+          this.navigateTo('home'); // Redirect to home after successful login
+          console.log('Login Successful, ', this.username);
+          console.log('Current User Role:', this.userRole);
+        },
+        (error) => {
+          // If login fails
+          this.loginError = error.error.message || 'Invalid username or password. Please try again.';
+        }
+      );
   }
 
   getOrCreateChatUser(username: string) {
@@ -112,28 +188,74 @@ export class AppComponent {
 
   logout() {
     this.isAuthenticated = false;
-    this.username = '';
-    this.password = '';
-    this.userRole = ''; // Reset user role on logout
     this.chatUser = null; // Reset chat user info
     localStorage.removeItem('chatUsername');
     this.navigateTo('home'); // Redirect to home after logout
+    console.log(this.username, 'logged out successfully');
   }
 
   // Group Management functions
-  createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
-  this.groups.push({ name: groupName, channels: [], members: [], requests: [] });
-  console.log(`Group created: ${groupName}`);
+createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
+  // Create the group object (without pushing it yet)
+  const newGroup: { _id?: string, name: string, channels: any[], members: any[], requests: any[] } = {
+    _id: undefined, // Initialize _id as undefined
+    name: groupName,
+    channels: [],
+    members: [],
+    requests: []
+  };
+
+  console.log(`Creating group: ${groupName}`);
+
+  // Assume adminId is obtained from local storage or other sources
+  const adminId = localStorage.getItem('userId'); // Replace with your method of getting the admin ID
+
+  // Call the backend to save the new group
+  this.http.post('http://localhost:5000/api/create-group', { name: groupName, adminId })
+    .subscribe(
+      (response: any) => {
+        // Assuming response contains the newly created group with _id
+        newGroup._id = response._id;  // Update the local object with the _id from DB
+
+        // Now update the local state
+        this.groups.push(newGroup);  // Add the group to the list only after it's successfully created in the DB
+        console.log('Group created successfully:', response);
+      },
+      (error) => {
+        console.error('Error creating group:', error);
+      }
+    );
 }
 
-  createChannel(groupName: string) {
-    const group = this.groups.find(g => g.name === groupName);
+
+  createChannel(channelName: string, groupId: string) {
+    // Create the channel object
+    const newChannel = { name: channelName, members: [] };
+
+    // Find the group in local state
+    const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
+
     if (group) {
-      const newChannelName = `Channel ${group.channels.length + 1} of ${groupName}`;
-      group.channels.push({ name: newChannelName, members: [] });
-      console.log('Creating channel:', newChannelName);
+        // Update local state by adding the new channel
+        group.channels.push(newChannel);
+        console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+
+        // Call the backend to save the new channel
+        this.http.post('http://localhost:5000/api/create-channel', { name: channelName, groupId })
+            .subscribe(
+                (response: any) => {
+                    console.log('Channel created successfully:', response);
+                },
+                (error) => {
+                    console.error('Error creating channel:', error);
+                }
+            );
+    } else {
+        console.error(`Group with ID ${groupId} not found.`);
     }
-  }
+}
+
+
 
   removeGroup(groupName: string) {
     this.groups = this.groups.filter(g => g.name !== groupName);
@@ -147,6 +269,32 @@ export class AppComponent {
       console.log('Removing channel:', channelName, 'from', groupName);
     }
   }
+  joinGroup(groupName: string) {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    this.http.post('http://localhost:5000/api/join-group', { userId, groupName })
+      .subscribe(
+        (response: any) => {
+          console.log('Joined group successfully:', response);
+        },
+        (error) => {
+          console.error('Error joining group:', error);
+        }
+      );
+  }
+  
+  joinChannel(groupName: string, channelName: string) {
+    const userId = localStorage.getItem('userId'); // Get userId from localStorage
+    this.http.post('http://localhost:5000/api/join-channel', { userId, groupName, channelName })
+      .subscribe(
+        (response: any) => {
+          console.log('Joined channel successfully:', response);
+        },
+        (error) => {
+          console.error('Error joining channel:', error);
+        }
+      );
+}
+
 
   joinGroupRequest(groupName: string) {
     const group = this.groups.find(g => g.name === groupName);
@@ -252,25 +400,6 @@ export class AppComponent {
         this.chatUser.groups = this.chatUser.groups.filter(g => g !== groupName);
       }
       console.log('Removed user:', username, 'from group:', groupName);
-    }
-  }
-
-  joinChannel(groupName: string, channelName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      const channel = group.channels.find(c => c.name === channelName);
-      if (channel && this.chatUser?.groups?.includes(groupName)) {
-        if (this.chatUser.username && !channel.members.includes(this.chatUser.username)) {
-          channel.members.push(this.chatUser.username);
-          console.log('Joined channel:', channelName, 'in group:', groupName);
-        } else {
-          console.warn('Already a member of the channel or channel not found');
-        }
-      } else {
-        console.warn('User is not part of the group or group not found');
-      }
-    } else {
-      console.warn('Group not found:', groupName);
     }
   }
 
@@ -390,9 +519,9 @@ createUser() {
             role: 'chatUser' as 'chatUser'
         };
 
-        this.http.post('http://localhost:3000/api/register', newUser).subscribe(
+        this.http.post('http://localhost:5000/api/register', newUser).subscribe(
             (response) => {
-                console.log('User registered:', newUsername);
+                console.log('User registered:', newUser);
                 this.username = newUsername;
                 this.password = newPassword;
                 this.login();
@@ -427,6 +556,8 @@ createUser() {
   }
 
   ngOnInit(): void {
+    
+    this.getUserData(); // Call the method here to fetch user data on initialization
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
