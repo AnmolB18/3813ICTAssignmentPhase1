@@ -60,6 +60,7 @@ export class AppComponent {
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
+  channelCounts: { [key: string]: number } = {}; // Map to track channel counts for each group
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -228,32 +229,44 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
 }
 
 
-  createChannel(channelName: string, groupId: string) {
-    // Create the channel object
-    const newChannel = { name: channelName, members: [] };
+createChannel(groupId: string) {
+  // Find the group in local state
+  const group = this.groups.find(g => g._id === groupId);
 
-    // Find the group in local state
-    const group = this.groups.find(g => g._id === groupId); // Ensure you're using the correct identifier
+  if (group) {
+      // Initialize count for the group if it doesn't exist
+      if (!this.channelCounts[groupId]) {
+          this.channelCounts[groupId] = 0;
+      }
+      
+      // Increment the channel count for this group
+      this.channelCounts[groupId]++;
 
-    if (group) {
-        // Update local state by adding the new channel
-        group.channels.push(newChannel);
-        console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+      // Create the new channel name
+      const channelName = `Channel ${this.channelCounts[groupId]}`; // "New Channel 1", "New Channel 2", etc.
 
-        // Call the backend to save the new channel
-        this.http.post('http://localhost:5000/api/create-channel', { name: channelName, groupId })
-            .subscribe(
-                (response: any) => {
-                    console.log('Channel created successfully:', response);
-                },
-                (error) => {
-                    console.error('Error creating channel:', error);
-                }
-            );
-    } else {
-        console.error(`Group with ID ${groupId} not found.`);
-    }
+      // Create the channel object
+      const newChannel = { name: channelName, members: [] };
+
+      // Update local state by adding the new channel
+      group.channels.push(newChannel);
+      console.log(`Channel created locally: ${channelName} in Group ${group.name}`);
+
+      // Call the backend to save the new channel
+      this.http.post('http://localhost:5000/api/create-channel', { name: channelName, groupId })
+          .subscribe(
+              (response: any) => {
+                  console.log('Channel created successfully:', response);
+              },
+              (error) => {
+                  console.error('Error creating channel:', error);
+              }
+          );
+  } else {
+      console.error(`Group with ID ${groupId} not found.`);
+  }
 }
+
 
 
 
