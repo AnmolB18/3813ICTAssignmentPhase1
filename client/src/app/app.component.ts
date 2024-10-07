@@ -8,7 +8,8 @@ import { SocketService } from './sockets.service';
 import { Injectable } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { UserService } from './user.service';
 
 interface User {
   _id: string;       // The user's unique ID from MongoDB
@@ -37,6 +38,7 @@ interface Group {
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
+  providers: [UserService],
 })
 
 @Injectable({
@@ -60,6 +62,8 @@ export class AppComponent implements OnInit {
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
+  userService: any;
+  router: any;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -355,14 +359,25 @@ createChannel(groupId: string) {
   }
 
   deleteAccount() {
-    if (this.chatUser) {
-      if (confirm('Are you sure you want to delete your account?')) {
-        console.log('Deleting account for user:', this.chatUser.username);
-        this.logout();
-      } else {
-        console.log('Account deletion cancelled.');
-      }
+    const userId = localStorage.getItem('userId'); // Retrieve the user ID
+    console.log('Attempting to delete account with user ID:', userId); // Debugging line
+
+    if (!userId) {
+      console.error("User ID is not available.");
+      return;
     }
+
+    this.userService.deleteAccount(userId).subscribe({
+      next: () => {
+        alert('Account deleted successfully!');
+        localStorage.removeItem('userId'); // Remove user ID from localStorage
+        this.router.navigate(['/login']); // Navigate to login page
+      },
+      error: (err: any) => {
+        console.error('Error deleting account:', err);
+        alert('There was an error deleting your account.');
+      }
+    });
   }
 
   approveRequest(groupName: string, username: string) {

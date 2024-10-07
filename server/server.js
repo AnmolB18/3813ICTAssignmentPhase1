@@ -11,11 +11,12 @@ const io = socketIo(server);
 const messageRoutes = require('./api/messages');
 const userRoutes = require('./api/users');
 const channelsRouter = require('./routes');
+const router = require('./routes');
 
 // Enable CORS for your entire Express app (optional)
 app.use(cors({
   origin: "http://localhost:4200",  // Allow your Angular app (remove the trailing slash)
-  methods: ["GET", "POST"]
+  methods: ["GET", "POST", "DELETE", "UPDATE"]
 }));
 
 mongoose.connect('mongodb://localhost:27017/MyDB',{ useNewUrlParser: true, useUnifiedTopology: true })
@@ -114,5 +115,24 @@ app.get('/users/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Delete account endpoint
+router.delete('/api/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log('Attempting to delete user with ID:', userId); // Debugging line
+
+    const result = await User.findByIdAndDelete(userId); // Use findByIdAndDelete with MongoDB ID
+    if (!result) {
+      console.error('User not found:', userId); // Debugging line
+      return res.status(404).send({ message: 'User not found' });
+    }
+    res.status(200).send({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting account:', error); // Debugging line
+    res.status(500).send({ error: 'Failed to delete account' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

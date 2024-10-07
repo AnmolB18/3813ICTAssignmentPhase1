@@ -126,4 +126,23 @@ router.post('/api/create-channel', (req, res) => {
       res.status(500).json({ message: 'Error creating channel', error });
     });
 });
+
+// Delete account endpoint
+router.delete('/api/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    console.log('Attempting to delete user with ID:', userId); // Debugging line
+
+    const result = await User.findByIdAndDelete(userId); // Use findByIdAndDelete with MongoDB ID
+    if (!result) {
+      console.error('User not found:', userId); // Debugging line
+      return res.status(404).send({ message: 'User not found' });
+    }
+    res.status(200).send({ message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting account:', error); // Debugging line
+    res.status(500).send({ error: 'Failed to delete account' });
+  }
+});
+
 module.exports = router;  // Export the router so it can be used in the main server file
