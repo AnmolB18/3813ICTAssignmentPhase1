@@ -8,8 +8,7 @@ import { SocketService } from './sockets.service';
 import { Injectable } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { UserService } from './user.service';
+import { Observable } from 'rxjs';
 
 interface User {
   _id: string;       // The user's unique ID from MongoDB
@@ -38,7 +37,6 @@ interface Group {
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
-  providers: [UserService],
 })
 
 @Injectable({
@@ -62,8 +60,6 @@ export class AppComponent implements OnInit {
   userGroups: any[] = []; // Store user's groups
   userChannels: any[] = []; // Store user's channels
   groups: Group[] = [];
-  userService: any;
-  router: any;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -136,7 +132,7 @@ getUserData() {
   
           // If login is successful
           this.isAuthenticated = true;
-  
+          
           // Store userId in localStorage using the response object
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('userId', response.user._id); // Use response.user._id instead of user._id
@@ -151,6 +147,13 @@ getUserData() {
             this.userRole = 'chatUser'; // Handle unexpected roles
           }
   
+          // Initialize the chatUser object here
+          this.chatUser = {
+          username: response.user.username,
+          publicUsername: response.user.username,
+          groups: []
+        };
+
           this.fetchUserDetails(response.user._id); // Use the logged-in user's ID to fetch details
           this.loginError = null;
           this.navigateTo('home'); // Redirect to home after successful login
@@ -302,19 +305,42 @@ createChannel(groupId: string) {
 }
 
 
-  joinGroupRequest(groupName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group && this.chatUser) {
-      if (!group.requests.includes(this.chatUser.username)) {
-        group.requests.push(this.chatUser.username);
-        console.log('Requesting to join group:', groupName);
-      }
-      // Remove the join request button for the user
-      if (this.currentSection === 'groupManagement') {
-        this.chatUser.groups.push(groupName);
-      }
-    }
+joinGroupRequest(groupName: string) {
+  console.log('Join group request initiated for group:', groupName); // Debugging log
+  const group = this.groups.find(g => g.name === groupName);
+  
+  if (!group) {
+      console.error('Group not found:', groupName);
+      return; // Exit if group is not found
   }
+
+  console.log('Found group:', group); // Debugging log
+
+  if (!this.chatUser) {
+      console.error('Chat user is not initialized.');
+      return; // Exit if chatUser is null
+  }
+
+  if (!group.requests.includes(this.chatUser.username)) {
+      group.requests.push(this.chatUser.username);
+      console.log('User joined request added:', this.chatUser.username); // Debugging log
+
+      // Now send a request to the backend server
+      this.http.post(`/api/groups/requestJoin`, {
+          username: this.chatUser.username,
+          groupName: groupName
+      }).subscribe(
+          response => {
+              console.log('Join request sent successfully:', response);
+          },
+          error => {
+              console.error('Error sending join request:', error);
+          }
+      );
+  } else {
+      console.log('User has already requested to join this group:', this.chatUser.username); // Debugging log
+  }
+}
     
   leaveGroup(groupName: string) {
     const chatUsername = this.chatUser?.username;
@@ -359,25 +385,14 @@ createChannel(groupId: string) {
   }
 
   deleteAccount() {
-    const userId = localStorage.getItem('userId'); // Retrieve the user ID
-    console.log('Attempting to delete account with user ID:', userId); // Debugging line
-
-    if (!userId) {
-      console.error("User ID is not available.");
-      return;
-    }
-
-    this.userService.deleteAccount(userId).subscribe({
-      next: () => {
-        alert('Account deleted successfully!');
-        localStorage.removeItem('userId'); // Remove user ID from localStorage
-        this.router.navigate(['/login']); // Navigate to login page
-      },
-      error: (err: any) => {
-        console.error('Error deleting account:', err);
-        alert('There was an error deleting your account.');
+    if (this.chatUser) {
+      if (confirm('Are you sure you want to delete your account?')) {
+        console.log('Deleting account for user:', this.chatUser.username);
+        this.logout();
+      } else {
+        console.log('Account deletion cancelled.');
       }
-    });
+    }
   }
 
   approveRequest(groupName: string, username: string) {

@@ -126,23 +126,28 @@ router.post('/api/create-channel', (req, res) => {
       res.status(500).json({ message: 'Error creating channel', error });
     });
 });
+router.post('/requestJoin', (req, res) => {
+  const { username, groupName } = req.body;
+  
+  // Log received request for debugging
+  console.log(`Received join request from ${username} for group ${groupName}`);
 
-// Delete account endpoint
-router.delete('/api/users/:id', async (req, res) => {
-  try {
-    const userId = req.params.id;
-    console.log('Attempting to delete user with ID:', userId); // Debugging line
-
-    const result = await User.findByIdAndDelete(userId); // Use findByIdAndDelete with MongoDB ID
-    if (!result) {
-      console.error('User not found:', userId); // Debugging line
-      return res.status(404).send({ message: 'User not found' });
-    }
-    res.status(200).send({ message: 'Account deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting account:', error); // Debugging line
-    res.status(500).send({ error: 'Failed to delete account' });
-  }
+  // Find the group in the database and add the join request
+  // Assuming you have a Group model set up
+  Group.findOne({ name: groupName })
+      .then(group => {
+          if (!group) {
+              return res.status(404).send('Group not found');
+          }
+          // Add the request to the group
+          group.requests.push(username);
+          return group.save();
+      })
+      .then(() => res.status(200).send('Join request sent'))
+      .catch(error => {
+          console.error('Error handling join request:', error);
+          res.status(500).send('Server error');
+      });
 });
 
 module.exports = router;  // Export the router so it can be used in the main server file
