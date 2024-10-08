@@ -13,6 +13,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
+
 interface Channel {
   _id: string;
   name: string;
@@ -76,8 +77,9 @@ export class AppComponent implements OnInit {
   channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
   messageText: string = '';
   currentChannel: string | null = null;
-  userService: any;
   router: any;
+  userId: string = '';
+  userService: any;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -442,23 +444,26 @@ joinGroupRequest(groupName: string) {
   }
 
   deleteAccount() {
+    const userId = localStorage.getItem('userId');
+
     console.log('Delete Account button clicked');
-    console.log('Current User ID:', this.userId); // Check the user ID being passed
+    console.log('Current User ID:', userId); // Check the user ID being passed
 
-    this.userService.deleteAccount(this.userId).subscribe(
-      (      response: any) => {
-        console.log('Response from deleteAccount:', response);
-        this.router.navigate(['/login']); // Redirect to login page
-      },
-      (      error: any) => {
-        console.error('Error deleting account:', error);
-      }
-    );
-  }
-
-  userId(userId: any) {
-    throw new Error('Method not implemented.');
-  }
+    if (userId) {
+        this.http.delete(`http://localhost:5000/api/users/deleteAccount/${userId}`).subscribe(
+            (response: any) => {
+                console.log('Response from deleteAccount:', response);
+                // Refresh the page after a successful delete
+                location.reload();
+            },
+            (error: any) => {
+                console.error('Error deleting account:', error);
+            }
+        );
+    } else {
+        console.error('No user ID found in localStorage');
+    }
+}
   
   approveUser(username: string, groupName: string) {
     // Assuming you have an array to hold approved users
@@ -657,6 +662,7 @@ createUser() {
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
+    
     
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(

@@ -36,7 +36,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/channels', channelsRoutes);
 
 // User routes
-app.use('/api/users', userRoutes);
+app.use('/api', userRoutes);
 
 // Root route
 app.get('/', (req, res) => {

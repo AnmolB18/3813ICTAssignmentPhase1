@@ -3,11 +3,13 @@ import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { isPlatformBrowser } from '@angular/common';
 
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private socket: Socket | undefined;
+  private apiUrl = 'http://localhost:5000/api/users';
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
