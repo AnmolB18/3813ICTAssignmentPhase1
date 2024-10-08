@@ -74,7 +74,8 @@ export class AppComponent implements OnInit {
   groups: Group[] = [];
   approvedUsers: string[] = [];  // Initialize the array in the class
   channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
-
+  messageText: string = '';
+  currentChannel: string | null = null;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -646,6 +647,7 @@ createUser() {
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
+    
     // Listen for incoming messages from the server
     this.socketService.getMessages().subscribe(
       (msg: { username: string; message: string; }) => {
