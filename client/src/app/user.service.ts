@@ -22,8 +22,7 @@ export class UserService {
   }
 
   deleteAccount(userId: string): Observable<any> {
-    const url = `${this.baseUrl}/${userId}`;
-    console.log('Making DELETE request to:', url); // Debugging line
-    return this.http.delete(url);
+    console.log(`Attempting to delete account for user ID: ${userId}`);
+    return this.http.delete(`${this.apiUrl}/deleteAccount/${userId}`);
   }
 }

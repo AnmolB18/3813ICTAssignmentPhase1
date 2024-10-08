@@ -76,6 +76,8 @@ export class AppComponent implements OnInit {
   channels: Channel[] = [];  // Initialize an empty array or assign the fetched channels
   messageText: string = '';
   currentChannel: string | null = null;
+  userService: any;
+  router: any;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -440,14 +442,22 @@ joinGroupRequest(groupName: string) {
   }
 
   deleteAccount() {
-    if (this.chatUser) {
-      if (confirm('Are you sure you want to delete your account?')) {
-        console.log('Deleting account for user:', this.chatUser.username);
-        this.logout();
-      } else {
-        console.log('Account deletion cancelled.');
+    console.log('Delete Account button clicked');
+    console.log('Current User ID:', this.userId); // Check the user ID being passed
+
+    this.userService.deleteAccount(this.userId).subscribe(
+      (      response: any) => {
+        console.log('Response from deleteAccount:', response);
+        this.router.navigate(['/login']); // Redirect to login page
+      },
+      (      error: any) => {
+        console.error('Error deleting account:', error);
       }
-    }
+    );
+  }
+
+  userId(userId: any) {
+    throw new Error('Method not implemented.');
   }
   
   approveUser(username: string, groupName: string) {

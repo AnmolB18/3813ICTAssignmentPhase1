@@ -36,7 +36,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/channels', channelsRoutes);
 
 // User routes
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -213,6 +213,38 @@ app.get('/api/channels', async (req, res) => {
     res.status(500).json({ message: 'Server error' }); // Handle errors
   }
 });
+
+// DELETE endpoint to delete a user account
+// DELETE method to delete a user account
+app.delete('/api/users/deleteAccount/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+      // Remove user from Group and Channel references
+      await Group.updateMany({ 
+          $or: [{ memberIds: userId }, { admins: userId }] 
+      }, {
+          $pull: { memberIds: userId, admins: userId }
+      });
+
+      await Channel.updateMany({ 
+          members: userId 
+      }, {
+          $pull: { members: userId }
+      });
+
+      // Delete the user
+      const user = await User.findByIdAndDelete(userId);
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json({ message: 'User account deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting account:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
