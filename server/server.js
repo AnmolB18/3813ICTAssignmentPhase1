@@ -1,3 +1,4 @@
+//server.js
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -10,9 +11,8 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const messageRoutes = require('./api/messages');
 const userRoutes = require('./api/users');
-const channelsRouter = require('./routes');
-const {Group} = require('./models');
-
+const {Group, User, Channel} = require('./models');
+const channelsRoutes = require('./api/channels');
 // Enable CORS for your entire Express app (optional)
 app.use(cors({
   origin: "http://localhost:4200",  // Allow your Angular app (remove the trailing slash)
@@ -33,7 +33,7 @@ db.on('error', (err) => {
 app.use(bodyParser.json());  // Parse incoming JSON requests
 app.use(express.json());
 app.use('/api/messages', messageRoutes);
-app.use('/api/channels', channelsRouter);
+app.use('/api/channels', channelsRoutes);
 
 // User routes
 app.use('/api', userRoutes);
@@ -43,7 +43,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Chat Application!');
 });
 
-const { Message, User } = require('./models'); // Importing the Message model
+const { Message } = require('./models'); // Importing the Message model
 
 // Socket.IO connection handler
 io.on('connection', (socket) => {
@@ -139,7 +139,80 @@ app.post('/api/groups/requestJoin', async (req, res) => {
   }
 });
 
+// Define the approve request route
+app.post('/api/groups/approve-request', async (req, res) => {
+  const { username, groupName } = req.body;
 
+  // Add your logic to approve the request here
+  try {
+    // Example logic to update user and group in MongoDB
+    const user = await User.findOne({ username });
+    const group = await Group.findOne({ name: groupName });
+
+    if (!user || !group) {
+      return res.status(404).json({ message: 'User or group not found' });
+    }
+
+    // Update group memberIds and user groups
+    group.memberIds.push(user._id);
+    user.groups.push(group._id);
+
+    await group.save();
+    await user.save();
+
+    res.json({ message: 'Request approved!' });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
+
+app.post('/api/channels/join', async (req, res) => {
+  try {
+      const { username, channelId } = req.body;
+
+      // Log the incoming request data
+      console.log(`Username: ${username}, Channel ID: ${channelId}`);
+
+      // Find the user and channel by their IDs
+      const user = await User.findOne({ username: username });
+      const channel = await Channel.findById(channelId);
+
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+      if (!channel) {
+          return res.status(404).json({ message: 'Channel not found' });
+      }
+
+      // Add the user's _id to the channel's members list if not already added
+      if (!channel.members.includes(user._id)) {
+          channel.members.push(user._id); // Use user._id here
+          await channel.save();
+      }
+
+      // Add the channelId to the user's channels array if not already added
+      if (!user.channels.includes(channelId)) {
+          user.channels.push(channelId);
+          await user.save();
+      }
+
+      res.status(200).json({ message: 'Successfully joined the channel' });
+  } catch (err) {
+      console.error('Error joining channel:', err); // Log the error in the server console
+      res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+// Get all channels
+app.get('/api/channels', async (req, res) => {
+  try {
+    const channels = await Channel.find(); // Fetch all channels from the database
+    res.json(channels); // Send the channels as a JSON response
+  } catch (error) {
+    console.error('Error fetching channels:', error);
+    res.status(500).json({ message: 'Server error' }); // Handle errors
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
