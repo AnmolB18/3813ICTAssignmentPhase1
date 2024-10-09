@@ -36,6 +36,7 @@ _id: string; name: string; members: string[]
   members: string[];
   requests: string[];
 }
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -743,6 +744,7 @@ demoteUser() {
     this.getUserData(); // Call the method here to fetch user data on initialization
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
+    this.fetchGroups(); // Fetch the list of groups when the component initializes
     
     
     // Listen for incoming messages from the server
@@ -769,6 +771,7 @@ demoteUser() {
       );
   }
 
+
 // Send a new message to the server
 sendMessage(username: string, text: string): void {
   const messageObject = { username: username, text: text }; // Use the parameters correctly
@@ -787,26 +790,40 @@ getMessages(): Observable<any> {
   }
 
   deleteGroup() {
-    const groupNameToDelete = prompt('Enter the group name to delete:'); // Prompt for group name
+  const groupNameToDelete = prompt('Enter the group name to delete:'); // Prompt for group name
 
-    console.log('Delete Group button clicked');
-    console.log('Group name to delete:', groupNameToDelete);
+  console.log('Delete Group button clicked');
+  console.log('Group name to delete:', groupNameToDelete);
 
-    if (groupNameToDelete) {
-        this.http.delete(`http://localhost:5000/api/groups/delete/${groupNameToDelete}`).subscribe(
-            (response: any) => {
-                console.log('Response from deleteGroup:', response);
-                alert(`Group ${groupNameToDelete} has been deleted.`);
-                // Optional: refresh the group list or update the UI accordingly
-            },
-            (error: any) => {
-                console.error('Error deleting group:', error);
-                alert(`Error deleting group: ${groupNameToDelete}. Please try again.`);
-            }
-        );
-    } else {
-        console.error('No group name entered');
-        alert('Please enter a group name to delete.');
-    }
+  if (groupNameToDelete) {
+    this.http.delete(`http://localhost:5000/api/groups/delete/${groupNameToDelete}`).subscribe(
+      (response: any) => {
+        console.log('Response from deleteGroup:', response);
+        alert(`Group ${groupNameToDelete} has been deleted.`);
+        
+        // Update the groups list after deletion
+        this.groups = this.groups.filter(group => group.name !== groupNameToDelete); // Corrected filtering
+      },
+      (error: any) => {
+        console.error('Error deleting group:', error);
+        alert(`Error deleting group: ${groupNameToDelete}. Please try again.`);
+      }
+    );
+  } else {
+    console.error('No group name entered');
+    alert('Please enter a group name to delete.');
+  }
 }
+
+fetchGroups() {
+  this.http.get<Group[]>(`http://localhost:5000/api/groups`).subscribe(
+    (data: Group[]) => {
+      this.groups = data; // Direct assignment if data is already of type Group[]
+    },
+    (error: any) => {
+      console.error('Error fetching groups:', error);
+    }
+  );
+}
+
 }
