@@ -846,4 +846,9 @@ fetchGroups() {
     }
   );
 }
+openChatPage() {
+  window.open('http://localhost:5001/', '_blank', 'width=800,height=600');
+  this.navigateTo('chat');
+}
+
 }
