@@ -52,5 +52,29 @@ router.get('/api/channels', async (req, res) => {
     }
   });
 
+// DELETE method to delete a channel
+router.delete('/api/channels/delete/:channelId', async (req, res) => {
+    const channelId = req.params.channelId;
+
+    try {
+        // Find the channel and delete it
+        const deletedChannel = await Channel.findByIdAndDelete(channelId);
+        if (!deletedChannel) {
+            return res.status(404).json({ message: 'Channel not found' });
+        }
+
+        // Remove the channel ID from the groups that contain it
+        await Group.updateMany(
+            { channels: channelId }, // Find groups that have the channel
+            { $pull: { channels: channelId } } // Remove the channel ID from the array
+        );
+
+        res.status(200).json({ message: 'Channel deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting channel:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
   module.exports = router;

@@ -345,13 +345,22 @@ createChannel(groupId: string) {
     console.log('Removing group:', groupName);
   }
 
-  removeChannel(groupName: string, channelName: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      group.channels = group.channels.filter(c => c.name !== channelName);
-      console.log('Removing channel:', channelName, 'from', groupName);
+  deleteChannel(channelId: string) {
+    if (confirm('Are you sure you want to delete this channel?')) {
+        this.http.delete(`http://localhost:5000/api/channels/delete/${channelId}`).subscribe(
+            (response: any) => {
+                console.log('Response from deleteChannel:', response);
+                // Remove the deleted channel from the channels array
+                this.channels = this.channels.filter(channel => channel._id !== channelId);
+                alert(`Channel with ID ${channelId} has been deleted successfully.`);
+            },
+            (error: any) => {
+                console.error('Error deleting channel:', error);
+                alert(`Error deleting channel. Please try again.`);
+            }
+        );
     }
-  }
+}
 
   joinGroup(groupName: string) {
     const userId = localStorage.getItem('userId'); // Get userId from localStorage
@@ -825,5 +834,4 @@ fetchGroups() {
     }
   );
 }
-
 }

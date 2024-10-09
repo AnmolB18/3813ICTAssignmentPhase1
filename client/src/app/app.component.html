@@ -174,7 +174,9 @@
                     <button (click)="banMember(group.name, channel.name, member)">Ban and Report</button>
                   </li>
                 </ul>
-                <button (click)="removeChannel(group.name, channel.name)">Remove Channel</button>
+                <!-- Example template to display channels -->
+                <button (click)="deleteChannel(channel._id)">Delete Channel</button>
+
               </div>
               <!-- Manage Requests -->
               <div>
