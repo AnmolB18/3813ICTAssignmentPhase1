@@ -254,3 +254,20 @@ button:hover {
 .chat-section .chat-messages li:hover {
   background-color: #d5d9db;
 }
+
+table {
+  width: 50%;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
