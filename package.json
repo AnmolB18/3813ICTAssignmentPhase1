@@ -1,13 +1,26 @@
 {
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
   "dependencies": {
-    "peerjs": "^1.5.4"
+    "bcrypt": "^5.1.1",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.2",
+    "peer": "^1.0.2",
+    "socket.io": "^4.7.5",
+    "supertest": "^7.0.0"
   },
   "devDependencies": {
     "chai": "^5.1.1",
-    "mocha": "^10.7.3",
-    "supertest": "^7.0.0"
-  },
-  "scripts": {
-  "test": "mocha"
-}
+    "chai-http": "^5.1.1",
+    "mocha": "^10.7.3"
+  }
 }

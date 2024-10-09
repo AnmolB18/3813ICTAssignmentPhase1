@@ -7,17 +7,17 @@ describe('User Registration and Login', () => {
 
   before(() => {
       // Cleanup if necessary
-      cy.request('DELETE', 'http://localhost:3000/api/users/deleteAccount/testUserId'); // Replace with the actual ID
+      cy.request('DELETE', 'http://localhost:5000/api/users/deleteAccount/testUserId'); // Replace with the actual ID
   });
 
   it('should register a new user', () => {
-      cy.request('POST', 'http://localhost:3000/api/users/register', testUser)
+      cy.request('POST', 'http://localhost:5000/api/users/register', testUser)
           .its('status')
           .should('eq', 201);
   });
 
   it('should login with the new user', () => {
-      cy.request('POST', 'http://localhost:3000/api/users/login', {
+      cy.request('POST', 'http://localhost:5000/api/users/login', {
           username: testUser.username,
           password: testUser.password
       })

@@ -52,7 +52,7 @@ if (!role) {
         // Check if the user already exists
         const existingUser = await User.findOne({ username });
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists' });
+          return res.status(400).json({ message: 'User already exists' }); // Ensure this matches your test
         }
 
         // Determine role based on username

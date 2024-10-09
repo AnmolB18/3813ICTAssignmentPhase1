@@ -81,6 +81,7 @@ export class AppComponent implements OnInit {
   router: any;
   userId: string = '';
   userService: any;
+  errorMessage: string | null = null;
  
   
   constructor(private socketService: SocketService, private http: HttpClient, @Inject(PLATFORM_ID) private platformId: Object) {
@@ -757,6 +758,7 @@ demoteUser() {
     this.loadGroups(); // Load groups when the component initializes
     this.getChannels(); 
     this.fetchGroups(); // Fetch the list of groups when the component initializes
+    this.getGroupsAndChannels();
     
     // Fetch users when the component is initialized
     this.http.get<any[]>('http://localhost:5000/api/users').subscribe(
@@ -854,6 +856,19 @@ openChatPage() {
 openVideoChatPage() {
   window.open('http://localhost:4201/', '_blank', 'width=800,height=600');
   this.navigateTo('chat');
+}
+
+private getGroupsAndChannels() {
+  this.http.get<any>(this.apiUrl).subscribe(
+    data => {
+      this.groups = data.groups;
+      this.channels = data.channels;
+    },
+    error => {
+      console.error('Error fetching groups and channels', error);
+      this.errorMessage = 'Failed to load groups and channels. Please try again later.';
+    }
+  );
 }
 
 }
