@@ -122,6 +122,17 @@ export class AppComponent implements OnInit {
         // Handle the error, e.g., show an error message
       }
     );
+
+    this.http.post(`http://localhost:5000/api/groups/remove-from-requests`, payload).subscribe(
+      response => {
+        console.log('deleted user!', response); // Log the response
+        // Handle successful approval, e.g., show a message or refresh the list of requests
+      },
+      error => {
+        console.error('Error deleting user', error); // Log the error
+        // Handle the error, e.g., show an error message
+      }
+    );
   }
   
 // Method to fetch user details
