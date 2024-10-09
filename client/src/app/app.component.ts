@@ -116,6 +116,11 @@ export class AppComponent implements OnInit {
       response => {
         console.log('Request approved!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
       },
       error => {
         console.error('Error approving request', error); // Log the error
@@ -127,6 +132,11 @@ export class AppComponent implements OnInit {
       response => {
         console.log('deleted user!', response); // Log the response
         // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
       },
       error => {
         console.error('Error deleting user', error); // Log the error
@@ -493,12 +503,26 @@ joinGroupRequest(groupName: string) {
       });
   }
 
-  denyRequest(groupName: string, username: string) {
-    const group = this.groups.find(g => g.name === groupName);
-    if (group) {
-      group.requests = group.requests.filter(r => r !== username);
-      console.log('Denied request for user:', username, 'to join group:', groupName);
-    }
+  denyRequest(username: string, groupName: string) {
+    
+    const payload = { username, groupName }; // Create the payload object
+    console.log(payload); // Ensure this is correctly set
+  
+    this.http.post(`http://localhost:5000/api/groups/remove-from-requests`, payload).subscribe(
+      response => {
+        console.log('deleted user!', response); // Log the response
+        // Handle successful approval, e.g., show a message or refresh the list of requests
+        // Remove the approved request from the group.requests array
+        const group = this.groups.find(g => g.name === groupName);
+        if (group) {
+          group.requests = group.requests.filter(request => request !== username);
+        }
+      },
+      error => {
+        console.error('Error deleting user', error); // Log the error
+        // Handle the error, e.g., show an error message
+      }
+    );
   }
 
   removeMember(groupName: string, username: string) {
