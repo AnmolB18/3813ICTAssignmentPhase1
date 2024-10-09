@@ -865,7 +865,7 @@ private getGroupsAndChannels() {
       this.channels = data.channels;
     },
     error => {
-      console.error('Error fetching groups and channels', error);
+      console.error();
       this.errorMessage = 'Failed to load groups and channels. Please try again later.';
     }
   );
