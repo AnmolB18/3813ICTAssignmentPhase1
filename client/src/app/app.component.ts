@@ -121,6 +121,7 @@ export class AppComponent implements OnInit {
         const group = this.groups.find(g => g.name === groupName);
         if (group) {
           group.requests = group.requests.filter(request => request !== username);
+          alert ('User has been approved')
         }
       },
       error => {
