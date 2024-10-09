@@ -301,6 +301,7 @@ createGroup(groupName: string = `Group ${this.groups.length + 1}`) {
         // Now update the local state
         this.groups.push(newGroup);  // Add the group to the list only after it's successfully created in the DB
         console.log('Group created successfully:', response);
+        alert ('Group created successfully');
       },
       (error) => {
         console.error('Error creating group:', error);
@@ -326,6 +327,7 @@ createChannel(groupId: string) {
                   const createdChannel = { ...response }; // Assuming the backend returns the created channel with an _id
                   group.channels.push(createdChannel);
                   console.log(`Channel created: ${createdChannel.name} in Group ${group.name}`);
+                  alert ('Channel created successfully');
               },
               (error) => {
                   console.error('Error creating channel:', error);
@@ -349,12 +351,14 @@ createChannel(groupId: string) {
       console.log('Removing channel:', channelName, 'from', groupName);
     }
   }
+
   joinGroup(groupName: string) {
     const userId = localStorage.getItem('userId'); // Get userId from localStorage
     this.http.post('http://localhost:5000/api/join-group', { userId, groupName })
       .subscribe(
         (response: any) => {
           console.log('Joined group successfully:', response);
+          alert('Joined group successfully');
         },
         (error) => {
           console.error('Error joining group:', error);
@@ -368,6 +372,7 @@ createChannel(groupId: string) {
     this.http.post('http://localhost:5000/api/channels/join', payload).subscribe(
       (response) => {
         console.log('Joined channel successfully!', response);
+        alert('Joined channel successfully');
 
         const channel = this.channels.find(c => c._id === channelId);
         if (channel && !channel.members.includes(this.username)) {
@@ -411,6 +416,7 @@ joinGroupRequest(groupName: string) {
     }).pipe(
       tap(response => {
         console.log('Join request sent successfully:', response);
+        alert('Join request sent successfully');
       }),
       catchError(error => {
         console.error('Error sending join request:', error);
@@ -474,6 +480,7 @@ joinGroupRequest(groupName: string) {
         this.http.delete(`http://localhost:5000/api/users/deleteAccount/${userId}`).subscribe(
             (response: any) => {
                 console.log('Response from deleteAccount:', response);
+                alert('Account Deleted');
                 // Refresh the page after a successful delete
                 location.reload();
             },
@@ -524,6 +531,7 @@ deleteUser() {
         // If the response is successful
         this.approvedUsers.push(username);  // Push the username to the array
         console.log('Approved Users:', this.approvedUsers);
+        alert('User Approved');
       }, error => {
         console.error(error);
       });
@@ -543,6 +551,7 @@ deleteUser() {
         if (group) {
           group.requests = group.requests.filter(request => request !== username);
         }
+        alert('User Denied');
       },
       error => {
         console.error('Error deleting user', error); // Log the error
@@ -753,7 +762,6 @@ demoteUser() {
       .subscribe(
         (data) => {
           this.channels = data;
-          console.log('Channels fetched successfully:', this.channels);
         },
         (error) => {
           console.error('Error fetching channels:', error);
