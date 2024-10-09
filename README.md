@@ -1,98 +1,239 @@
-# Chat System for 3813ICT Assignment
-# Project Summary
+# Chat System
 
-This project is a fully functional text and video chat system that facilitates real-time communication among users within various groups and channels. It's built using the MEAN stack (MongoDB, Express, Angular, Node.js), with real-time messaging powered by Socket.io and video streaming enabled through Peer.js.
+## Introduction
+This project is a text and video chat system that enables users to communicate with each other in real-time within various groups and channels. It is built using the MEAN stack (MongoDB, Express, Angular, Node) along with Socket.io for real-time communication and Peer.js for video streaming.
 
-# Core Features
-The system supports three different user roles:
-- Super Admin
-- Group Admin
-- User
+## Features
+The chat system includes three levels of permissions:
+- **Super Admin**
+- **Group Admin**
+- **User**
 
-# Groups and Channels
-Groups: Groups are collections of users with specific permissions managed by either Group Admins or Super Admins. Users can be part of multiple groups, and a group can have multiple administrators. Super Admins have the ability to promote users to Group Admin status and can manage all groups across the system.
+### Group
+- Groups consist of chat users, with permissions granted by a Group Admin or Super Admin.
+- Users can belong to multiple groups.
+- Groups may have multiple admins.
+- Group Admins can manage more than one group.
+- Super Admins can promote users to Group Admins and access all groups.
 
-Channels: Channels are subgroups within a group intended for specialized discussions. Any user who belongs to a group can join any channel within that group.
+### Channel
+- Channels are subgroups within groups dedicated to chatting.
+- Users who are part of a group can join any channel within that group.
 
-# User Management
-Users are identified by a unique combination of username, email, roles, and associated groups. They can join or leave groups and channels as they wish. Users can also delete their accounts or log out of the system.
+### Users
+- Users are identified by a unique username, email, and assigned roles and groups.
+- Users can join or leave groups and participate in channels associated with those groups.
+- Users have the option to delete their accounts or log out.
 
-# Roles and Responsibilities
-## Super Admin:
-- Can promote users to Group Admin or other Super Admins.
-- Can remove users and perform all actions available to Group Admins.
-- Has unrestricted access to all groups and channels.
-## Group Admin:
-- Manages group and channel creation.
-- Can remove or ban users from groups or channels and report issues to Super Admins.
-## Chat User:
-- Can create an account, join groups, and participate in channels.
-- Has the ability to leave groups at any time.
-# Authentication and Security
-The system includes a default Super Admin account with credentials (super and 123).
-Users must log in with valid credentials to access the system.
-Once authenticated, users can perform actions according to their role.
-## Data Management
-Initially, data is managed using local storage in the browser. MongoDB will be introduced later to provide persistent data storage.
+### Messages
+- Messages are transmitted in real-time within channels.
+- Each message is stored in the database with the sender's username, text content, and a timestamp.
 
-# Documentation
-## Repository Structure and Workflow
-- Branching Model: The project uses a feature-based branching approach, where each new feature or bug fix is developed in a separate branch.
-- Commit Policy: Frequent commits ensure progress tracking and maintain a detailed history of changes.
-- Directory Structure:
-- server/: Contains the Node.js backend with Express routes, Socket handlers, and Peer.js integration.
-- client/: Houses the Angular frontend, including components, services, and models.
-##Data Models
-- User: { username: string, email: string, id: string, roles: string[], groups: string[] }
-- Group: { id: string, name: string, adminIds: string[], channelIds: string[] }
-- Channel: { id: string, groupId: string, name: string, userIds: string[] }
-## Angular Application Structure
+## User Roles
+- **Super Administrator**: 
+  - Can promote users to Group Admins or Super Admins.
+  - Can remove users and possesses all the functionalities of a Group Admin.
+  - Has access to all groups and channels.
+  
+- **Group Administrator**:
+  - Can create and manage groups and channels.
+  - Can remove users from the groups they administer.
+  - Can ban users from channels and report them to Super Admins.
+
+- **Chat User**:
+  - Can create a new chat user account.
+  - Can join groups and channels.
+  - Can express interest in groups and exit groups.
+
+## User Authentication
+- The initial setup includes a Super Admin with the username `superAdmin` and password `123`.
+- Users must authenticate using a username and password.
+- Authenticated users can access features based on their role.
+
+## Data Storage
+- In the first phase, browser-based local storage is utilized for storing data structures.
+- MongoDB will be introduced in the second phase for persistent storage.
+
+## Documentation
+
+### Git Repository Organization
+- **Branching**: The project follows a feature-branching model, where each feature or bug fix is developed in a separate branch.
+- **Update Frequency**: Regular commits are made to the repository to track progress and maintain a history of changes.
+  
+**Structure:**
+- `server/`: Contains the Node.js backend, including Express routes, socket handlers, and Peer.js integration.
+- `client/`: Contains the Angular frontend, including components, services, and models.
+
+### Data Structures
+**Client-Side**
+- **User**: 
+{ "username": "string", "email": "string", "id": "string", "roles": ["string"], "groups": ["string"], "channels": ["string"] }
+
+
+- **Groups**:
+{ "id": "string", "name": "string", "adminIds": ["string"], "channelIds": ["string"] }
+
+
+- **Channel**:
+{ "id": "string", "groupId": "string", "name": "string", "userIds": ["string"], "messages": ["Message"] }
+
+
+- **Message**:
+{ "username": "string", "text": "string", "timestamp": "Date" }
+
+**Server-Side**
+- **User Schema**: 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true },
+  password: { type: String, required: true },
+  roles: { type: [String], required: true },
+  groups: { type: [String], required: true },
+  channels: { type: [String], required: true }
+});
+
+- **Group Schema**:
+const groupSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  adminIds: { type: [String], required: true },
+  channelIds: { type: [String], required: true }
+});
+
+- **Channel Schema**:
+const channelSchema = new mongoose.Schema({
+  groupId: { type: String, required: true },
+  name: { type: String, required: true },
+  userIds: { type: [String], required: true },
+  messages: { type: [messageSchema], default: [] }
+});
+
+- **Message Schema**:
+const messageSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  text: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+});
+
+### Angular Architecture
 - Components: LoginComponent, GroupComponent, ChannelComponent, ChatComponent, AdminDashboardComponent
 - Services: AuthService, GroupService, ChannelService, ChatService
-- Models: User, Group, Channel
-## Routes:
-- /login: User login page.
-- /groups: Displays the user's groups.
-- /channels/:groupId: Shows channels within a group.
-- /chat/:channelId: Chat interface for a specific channel.
-- /admin: Admin dashboard for Super Admins and Group Admins.
-##Backend Architecture
-- Modules: auth.js, groups.js, channels.js, chat.js, admin.js
-- Core Functions: login, register, createGroup, deleteGroup, createChannel, deleteChannel, sendMessage, promoteUser
-## Files:
-- server.js: The main entry point for the Node.js application.
-- routes/: Holds route handlers for different functionalities.
-- models/: Contains Mongoose models (for MongoDB, to be used in phase two).
-- Global Variables: io (Socket.io instance), peerServer (Peer.js server instance)
-API Endpoints
-- POST /login: Authenticates a user and returns a token.
-- POST /register: Creates a new user account.
-- GET /groups: Retrieves the groups for the authenticated user.
-- POST /groups: Creates a new group (Group Admin only).
-- DELETE /groups/: Deletes a group (Group Admin only).
-- POST /channels: Adds a new channel to a group (Group Admin only).
-- DELETE /channels/: Removes a channel from a group (Group Admin only).
-- POST /messages: Sends a message to a channel.
-- POST /promote: Elevates a user to Group Admin status (Super Admin only).
-# Client-Server Interaction
-- Login Process: Users submit login details through AuthService; the server validates credentials and returns a token. The token is stored on the client-side, and the application shows the user's groups.
-- Group Management: Admins can create or delete groups using GroupService. The server updates the database, and the Angular frontend reflects these changes.
-- Channel Management: Admins manage channels via ChannelService, with server-side updates reflected on the frontend.
-- Chat Functionality: Messages are sent via ChatService using Socket.io, with real-time updates in the Angular app.
-# Getting Started
-## Requirements:
-- Node.js
-- Angular CLI
-- MongoDB (to be used in phase two)
-# Installation:
-- Clone the repository: git clone https://github.com/AnmolB18/3813ICTAssignmentPhase1.git
-- Set up the project directories:
-- cd server: For the backend setup.
-- cd client: For the frontend setup.
-## Install dependencies:
-- Run npm install in both directories.
-- Start the backend server:
-- Run npm start in the server directory.
-## Start the frontend client:
-- Run ng serve in the client directory.
-- Access the application at http://localhost:4200.
+- Models: User, Group, Channel, Message
+
+### Routes
+- `/login:` Displays the login page.
+- `/groups:` Displays the groups the user is a member of.
+- `/channels/:groupId:` Displays the channels within a group.
+- `/chat/:channelId:` Displays the chat interface for a channel.
+- `/admin:` Displays the admin dashboard for Super Admins and Group Admins.
+
+### Node Server Architecture
+- **Modules**:
+- auth.js
+- groups.js
+- channels.js
+- chat.js
+- admin.js
+- messages.js
+
+- **Functions**:
+- login
+- register
+- createGroup
+- deleteGroup
+- createChannel
+- deleteChannel
+- sendMessage
+- promoteUser
+
+### Files
+- `server.js:` Entry point of the Node.js application.
+- `routes/:` Contains route handlers for different functionalities.
+- `models/:` Contains Mongoose models (for the second phase).
+
+- Global Variables:
+- `io` (socket.io instance)
+- `peerServer` (Peer.js server instance)
+  
+### Server-Side Routes
+
+- `POST /login:` Authenticates a user and returns a token.
+- `POST /register:` Registers a new user.
+- `POST /api/channels/join:` Joins a channel.
+- `GET /api/channels:` Retrieves channels for a group.
+- `DELETE /api/channels/delete/:id:` Deletes a channel.
+- `POST /requestJoin:` Requests to join a group.
+- `POST /api/groups/approve-request:` Approves a user's request to join a group.
+- `POST /api/groups/remove-from-requests:` Removes a user from a group's requests.
+- `GET /api/user/requested-groups:` Retrieves the groups a user has requested to join.
+- `POST /join-group:` Joins a group.
+- `POST /joinChannel:` Joins a channel.
+- `POST /create-group:` Creates a new group.
+- `POST /create-channel:` Creates a new channel.
+- `GET /groups:` Retrieves all groups.
+- `DELETE /api/users/deleteAccount/:id:` Deletes a user account.
+- `DELETE /api/users/deleteUser/:username:` Deletes a user by username.
+- `PATCH /api/users/promote/:id:` Promotes a user to Group Admin or Super Admin.
+- `PATCH /api/users/demote/:id:` Demotes a user.
+- `GET /api/users:` Retrieves all users.
+
+### Testing
+
+- **Front-End Testing with Cypress**
+For front-end testing, Cypress is used to ensure that the Angular components and user flows operate as intended.
+
+- **Running the Tests**
+  To execute the Cypress tests, follow these steps
+
+- **Ensure you are in the client/ folder**:
+cd client
+
+- **Install the Cypress testing framework (if not already installed)**:
+npm install cypress --save-dev
+
+- **Open Cypress and run the tests**:
+ npx cypress open
+
+This will open the Cypress Test Runner, where you can view and execute the test cases.
+
+- **Cypress Test Coverage**
+The following components and user flows are tested using Cypress:
+
+- User Authentication: Ensures that users can register, log in, and log out.
+- Group Management: Admins can create, delete, and manage groups.
+- Channel Management: Admins can create, delete, and manage channels within a group.
+- Messaging: Tests the sending and receiving of messages in real-time.
+- Join Requests: Tests for group join requests and admin approvals.
+
+Cypress provides a visual test runner, allowing you to view each test case and its results in real-time. This ensures the application functions correctly during development and after code modifications.
+
+### Back-End Testing with Mocha and Chai
+Mocha and Chai are employed to test the server-side routes and functionalities.
+
+- **Running the Tests**
+To execute the Mocha tests, follow these steps:
+
+- **Navigate to the server directory**:
+  json cd server
+
+- **Ensure Mocha and Chai are installed**:
+  npm install mocha chai --save-dev
+
+- **Run the tests**:
+  npx mocha
+
+- **Mocha Test Coverage**
+The following server functionalities are tested using Mocha and Chai:
+- User Registration: Verifies that users can register successfully.
+- User Authentication: Ensures that users can log in with valid credentials.
+- Group and Channel Creation: Tests the creation and deletion of groups and channels.
+- Message Sending: Tests that messages can be sent and stored correctly.
+- Join Requests: Validates the handling of user requests to join groups.
+
+### Future Enhancements
+- Implement a more robust user role and permission management system.
+- Add features for private messaging between users.
+- Improve the user interface for better usability.
+- Enhance video streaming capabilities with additional features like screen sharing.
+  
+### Conclusion
+This chat system serves as a foundation for real-time communication applications and can be expanded with various enhancements based on user feedback and requirements. With its modular design and robust features, it aims to provide a seamless experience for users in both text and video communication.
