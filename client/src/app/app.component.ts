@@ -733,9 +733,11 @@ demoteUser() {
     }
   }
 
-  banMember(groupName: string, channelName: string, member: string): void {
-    console.log(`Reporting to super admins: Banned member ${member} from channel ${channelName} in group ${groupName}`)
-  }
+  // Method to display alert when a member is reported
+  banMember(groupName: string, channelName: string, member: any): void {
+    // Display an alert message
+    alert(`User ${member.username} has been reported for banning from ${groupName} in ${channelName}.`);
+    }
 
   loadGroups() {
     this.http.get<any[]>('http://localhost:5000/api/groups') // Adjust your API endpoint accordingly
