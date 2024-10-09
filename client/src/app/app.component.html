@@ -153,7 +153,7 @@
             <li *ngFor="let group of groups">
               <h3>{{ group.name }}</h3>
               <button *ngIf="group._id" (click)="createChannel(group._id)">Create Channel</button>
-              <button (click)="removeGroup(group.name)">Remove Group</button>
+              <button (click)="deleteGroup()">Remove Group</button>
               <!-- Members of Group -->
               <div>
                 <strong>Members of Group:</strong>

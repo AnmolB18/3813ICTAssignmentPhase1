@@ -371,5 +371,24 @@ app.patch('/api/users/demote/:username', async (req, res) => {
   }
 });
 
+// DELETE method to delete a group
+app.delete('/api/groups/delete/:groupName', async (req, res) => {
+  const groupName = req.params.groupName;
+
+  try {
+      // Find and delete the group by its name
+      const result = await Group.findOneAndDelete({ name: groupName });
+
+      if (!result) {
+          return res.status(404).json({ message: 'Group not found' });
+      }
+
+      res.status(200).json({ message: `Group ${groupName} deleted successfully` });
+  } catch (error) {
+      console.error('Error deleting group:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

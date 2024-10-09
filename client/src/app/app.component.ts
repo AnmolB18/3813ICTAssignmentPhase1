@@ -785,4 +785,28 @@ getMessages(): Observable<any> {
     // For example, you might get it from local storage or a service
     return 'username'; // Replace with actual logic to get the username
   }
+
+  deleteGroup() {
+    const groupNameToDelete = prompt('Enter the group name to delete:'); // Prompt for group name
+
+    console.log('Delete Group button clicked');
+    console.log('Group name to delete:', groupNameToDelete);
+
+    if (groupNameToDelete) {
+        this.http.delete(`http://localhost:5000/api/groups/delete/${groupNameToDelete}`).subscribe(
+            (response: any) => {
+                console.log('Response from deleteGroup:', response);
+                alert(`Group ${groupNameToDelete} has been deleted.`);
+                // Optional: refresh the group list or update the UI accordingly
+            },
+            (error: any) => {
+                console.error('Error deleting group:', error);
+                alert(`Error deleting group: ${groupNameToDelete}. Please try again.`);
+            }
+        );
+    } else {
+        console.error('No group name entered');
+        alert('Please enter a group name to delete.');
+    }
+}
 }
